@@ -12,15 +12,7 @@ const MyCourses = () => {
 
   const fetchEnrollments = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/enrollments/my-courses', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      const data = await api.getMyEnrollments();
       console.log('Enrollments data:', data);
       setEnrollments(Array.isArray(data) ? data : []);
     } catch (error) {
