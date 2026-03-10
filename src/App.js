@@ -8,12 +8,14 @@ import CourseDetails from './components/CourseDetails';
 import Enquiry from './pages/Enquiry';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import PasswordReset from './pages/PasswordReset';
 import Dashboard from './pages/Dashboard';
 import ManageCourses from './pages/ManageCourses';
 import ViewEnquiries from './pages/ViewEnquiries';
 import MyCourses from './pages/MyCourses';
 import Payment from './pages/Payment';
 import Reports from './pages/Reports';
+import ManageStudentProgress from './pages/ManageStudentProgress';
 import './App.css';
 
 function App() {
@@ -61,6 +63,7 @@ function App() {
             <Route path="/payment/:token" element={<Payment />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
             <Route path="/my-courses" element={
               user && user.role === 'user' ? <MyCourses /> : <Navigate to="/login" />
             } />
@@ -75,6 +78,9 @@ function App() {
             } />
             <Route path="/reports" element={
               user && user.role === 'admin' ? <Reports /> : <Navigate to="/login" />
+            } />
+            <Route path="/manage-progress" element={
+              user && user.role === 'admin' ? <ManageStudentProgress /> : <Navigate to="/login" />
             } />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

@@ -1,7 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 const NavBar = ({ user, logout }) => {
+  const [showAdminDropdown, setShowAdminDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowAdminDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <nav className="navbar">
       <div className="navbar-content">
@@ -15,12 +32,126 @@ const NavBar = ({ user, logout }) => {
           {user ? (
             <>
               {user.role === 'admin' && (
-                <>
-                  <Link to="/dashboard" className="nav-item">🏢 Operations Center</Link>
-                  <Link to="/manage-courses" className="nav-item">📚 Course Management</Link>
-                  <Link to="/view-enquiries" className="nav-item">🔄 Enquiry Workflow</Link>
-                  <Link to="/reports" className="nav-item">📊 Reports & Analytics</Link>
-                </>
+                <div className="admin-dropdown" ref={dropdownRef} style={{ position: 'relative' }}>
+                  <button 
+                    className="nav-item admin-menu-btn"
+                    onClick={() => setShowAdminDropdown(!showAdminDropdown)}
+                    style={{ 
+                      background: 'linear-gradient(135deg, #4285f4 0%, #1e40af 100%)',
+                      color: 'white',
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    🏢 Admin Panel
+                    <span style={{ transform: showAdminDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }}>
+                      ▾
+                    </span>
+                  </button>
+                  
+                  {showAdminDropdown && (
+                    <div className="admin-dropdown-menu" style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: '0',
+                      background: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                      minWidth: '220px',
+                      zIndex: 1000,
+                      marginTop: '8px'
+                    }}>
+                      <Link 
+                        to="/dashboard" 
+                        className="dropdown-item"
+                        onClick={() => setShowAdminDropdown(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          textDecoration: 'none',
+                          color: '#374151',
+                          fontSize: '14px',
+                          borderBottom: '1px solid #f3f4f6'
+                        }}
+                      >
+                        📊 Operations Center
+                      </Link>
+                      <Link 
+                        to="/manage-courses" 
+                        className="dropdown-item"
+                        onClick={() => setShowAdminDropdown(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          textDecoration: 'none',
+                          color: '#374151',
+                          fontSize: '14px',
+                          borderBottom: '1px solid #f3f4f6'
+                        }}
+                      >
+                        📚 Course Management
+                      </Link>
+                      <Link 
+                        to="/view-enquiries" 
+                        className="dropdown-item"
+                        onClick={() => setShowAdminDropdown(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          textDecoration: 'none',
+                          color: '#374151',
+                          fontSize: '14px',
+                          borderBottom: '1px solid #f3f4f6'
+                        }}
+                      >
+                        📧 Enquiry Workflow
+                      </Link>
+                      <Link 
+                        to="/manage-progress" 
+                        className="dropdown-item"
+                        onClick={() => setShowAdminDropdown(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          textDecoration: 'none',
+                          color: '#374151',
+                          fontSize: '14px',
+                          borderBottom: '1px solid #f3f4f6'
+                        }}
+                      >
+                        📊 Student Progress
+                      </Link>
+                      <Link 
+                        to="/reports" 
+                        className="dropdown-item"
+                        onClick={() => setShowAdminDropdown(false)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '12px 16px',
+                          textDecoration: 'none',
+                          color: '#374151',
+                          fontSize: '14px'
+                        }}
+                      >
+                        📈 Reports & Analytics
+                      </Link>
+                    </div>
+                  )}
+                </div>
               )}
               {user.role === 'user' && (
                 <Link to="/my-courses" className="nav-item">My Courses</Link>

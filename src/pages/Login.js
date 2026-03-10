@@ -176,6 +176,24 @@ const Login = ({ setUser }) => {
               </button>
             </div>
             
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <a 
+                href="/password-reset" 
+                style={{ 
+                  color: '#dc3545', 
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate('/password-reset');
+                }}
+              >
+                🔒 Forgot Password? Reset Here
+              </a>
+            </div>
+            
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <p style={{ color: 'var(--text-secondary)' }}>
                 Don't have an account?{' '}

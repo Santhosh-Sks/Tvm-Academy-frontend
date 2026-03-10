@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = {
   // Auth
@@ -170,6 +170,34 @@ const api = {
     return res.json();
   },
 
+  // Admin-only enrollment management
+  getAllEnrollments: async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BASE_URL}/enrollments/admin/all`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch enrollments');
+    }
+    return res.json();
+  },
+
+  updateStudentProgress: async (enrollmentId, progressData) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BASE_URL}/enrollments/${enrollmentId}/admin/progress`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(progressData),
+    });
+    if (!res.ok) {
+      throw new Error('Failed to update progress');
+    }
+    return res.json();
+  },
+
   // OTP Verification methods
   verifyRegistration: async (email, otp) => {
     const res = await fetch(`${BASE_URL}/auth/verify-registration`, {
@@ -241,6 +269,51 @@ const api = {
     
     const result = await res.json();
     return { data: result };
+  },
+
+  // Password Reset Functions
+  requestPasswordReset: async (email) => {
+    const res = await fetch(`${BASE_URL}/auth/request-password-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    return res.json();
+  },
+
+  verifyResetOTP: async (email, otp) => {
+    const res = await fetch(`${BASE_URL}/auth/verify-reset-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp }),
+    });
+    return res.json();
+  },
+
+  resetPassword: async (resetToken, newPassword) => {
+    const res = await fetch(`${BASE_URL}/auth/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resetToken, newPassword }),
+    });
+    return res.json();
+  },
+
+  // Admin function to reset student password
+  adminResetStudentPassword: async (studentId, data) => {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${BASE_URL}/auth/admin/reset-student-password/${studentId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      throw { response: { data: await res.json() } };
+    }
+    return res.json();
   },
 };
 

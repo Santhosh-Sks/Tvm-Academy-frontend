@@ -160,6 +160,17 @@ const Dashboard = () => {
               View Enquiries
             </a>
           </div>
+          
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', marginBottom: '15px' }}>📊</div>
+            <h4 style={{ color: '#2c3e50', marginBottom: '15px' }}>Student Progress</h4>
+            <p style={{ color: '#6c757d', marginBottom: '20px', fontSize: '14px' }}>
+              Track and update student learning progress weekly
+            </p>
+            <a href="/manage-progress" className="btn">
+              Manage Progress
+            </a>
+          </div>
         </div>
       </div>
       

@@ -66,16 +66,6 @@ const MyCourses = () => {
     });
   };
 
-  const updateProgress = async (enrollmentId, newProgress) => {
-    try {
-      await api.updateCourseProgress(enrollmentId, newProgress);
-      fetchEnrollments(); // Refresh data
-    } catch (error) {
-      console.error('Error updating progress:', error);
-      alert('Failed to update progress. Please try again.');
-    }
-  };
-
   if (loading) {
     return (
       <div className="main-section">
@@ -197,7 +187,7 @@ const MyCourses = () => {
                   <div style={{ marginBottom: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                       <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: '600' }}>
-                        Learning Progress
+                        Learning Progress (Updated by Academy)
                       </span>
                       <span style={{ fontSize: '16px', fontWeight: 'bold', color: enrollment.progress === 100 ? '#4caf50' : '#2196f3' }}>
                         {enrollment.progress || 0}%
@@ -221,6 +211,11 @@ const MyCourses = () => {
                     <div style={{ fontSize: '12px', color: '#666', marginTop: '4px', textAlign: 'center' }}>
                       {enrollment.progress === 100 ? '🎉 Course Completed!' : `${100 - (enrollment.progress || 0)}% remaining`}
                     </div>
+                    {enrollment.progressUpdatedAt && (
+                      <div style={{ fontSize: '11px', color: '#888', marginTop: '4px', textAlign: 'center' }}>
+                        📅 Last updated: {formatDate(enrollment.progressUpdatedAt)}
+                      </div>
+                    )}
                   </div>
                   
                   {/* Status Badge */}
@@ -259,21 +254,6 @@ const MyCourses = () => {
                         }}
                       >
                         📜 Certificate
-                      </button>
-                    )}
-                    
-                    {enrollment.progress < 100 && (
-                      <button 
-                        className="btn btn-secondary"
-                        style={{ fontSize: '13px' }}
-                        onClick={() => {
-                          const newProgress = prompt(`Update progress for ${enrollment.courseId?.title}. Current: ${enrollment.progress || 0}%. Enter new percentage (0-100):`);
-                          if (newProgress !== null && !isNaN(newProgress) && newProgress >= 0 && newProgress <= 100) {
-                            updateProgress(enrollment._id, parseInt(newProgress));
-                          }
-                        }}
-                      >
-                        📊 Update Progress
                       </button>
                     )}
                   </div>
