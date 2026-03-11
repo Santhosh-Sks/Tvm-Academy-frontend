@@ -7,6 +7,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   });
@@ -38,32 +39,51 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const result = await api.register(formData.name, formData.email, formData.password);
+      const result = await api.register(formData.name, formData.email, formData.phone, formData.password);
+      console.log('Registration result:', result);
       
-      if (result.requiresVerification) {
-        // Show verification component
-        setRegistrationEmail(formData.email);
-        setShowVerification(true);
-        setMessage('');
-      } else if (result.token) {
-        // Direct registration success (for backward compatibility)
-        setMessage('🎉 Registration successful! You can now login to access TVM Academy. Redirecting to login page...');
-        setFormData({
-          name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-        });
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 3000);
+      if (result.success) {
+        // Registration successful
+        if (result.requiresVerification) {
+          // Email verification required
+          setRegistrationEmail(formData.email);
+          setShowVerification(true);
+          setMessage('');
+          localStorage.setItem('pendingVerificationEmail', formData.email);
+        } else {
+          // Registration successful without verification (email service down)
+          setMessage(`🎉 Registration successful! ${result.message || 'Welcome to TVM Academy!'}\n\n✅ You can now login to access all our courses.`);
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            password: '',
+            confirmPassword: '',
+          });
+          // Redirect to login after showing success message
+          setTimeout(() => {
+            navigate('/login');
+          }, 4000);
+        }
       } else {
-        setError(result.error || 'Registration failed');
+        // Registration failed - handle different error types
+        let errorMessage = result.message || 'Registration failed. Please try again.';
+        
+        if (result.error === 'EMAIL_SERVICE_UNAVAILABLE') {
+          errorMessage = `${result.message}\n\n💡 Don't worry! You can still try registering - our system will create your account automatically if email service is temporarily down.`;
+        } else if (result.error === 'CLIENT_ERROR') {
+          errorMessage = `${result.message}\n\n🔍 Please check your information and try again.`;
+        } else if (result.error === 'SERVER_ERROR') {
+          errorMessage = `${result.message}\n\n⚠️ This is a temporary issue. Please try again in a few moments.`;
+        } else if (result.error === 'NETWORK_ERROR') {
+          errorMessage = `${result.message}\n\n🌐 Please check your internet connection and try again.`;
+        }
+        
+        setError(errorMessage);
       }
     } catch (error) {
-      console.error('Registration error:', error);
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      console.error('Unexpected registration error:', error);
+      setError('An unexpected error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -89,6 +109,7 @@ const Register = () => {
     setFormData({
       name: '',
       email: '',
+      phone: '',
       password: '',
       confirmPassword: '',
     });
@@ -136,8 +157,10 @@ const Register = () => {
                 <div className="alert-content">
                   <span>⚠️</span>
                   <div>
-                    <h4>Registration Error</h4>
-                    <p>{error}</p>
+                    <h4>Registration Issue</h4>
+                    <div style={{ whiteSpace: 'pre-line', lineHeight: '1.5' }}>
+                      {error}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -172,6 +195,23 @@ const Register = () => {
                 />
                 <small style={{ color: '#666', fontSize: '12px' }}>
                   📧 You'll receive a verification email to complete registration
+                </small>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="phone">Phone Number *</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="form-input"
+                  placeholder="Enter your phone number"
+                  required
+                />
+                <small style={{ color: '#666', fontSize: '12px' }}>
+                  📱 Used for account security and course updates
                 </small>
               </div>
               
@@ -244,11 +284,29 @@ const Register = () => {
                 🔐 Registration Process:
               </h4>
               <ol style={{ margin: 0, paddingLeft: '20px', color: '#666', fontSize: '12px' }}>
-                <li>Fill out the registration form</li>
-                <li>Check your email for verification code</li>
-                <li>Enter the 6-digit code to verify your email</li>
+                <li>Fill out the registration form above</li>
+                <li>Submit your information securely</li>
+                <li>
+                  <strong>Email verification:</strong>
+                  <ul style={{ marginTop: '5px', color: '#888' }}>
+                    <li>✅ If email service is working: Check your email for verification code</li>
+                    <li>⚡ If email service is down: Account created automatically</li>
+                  </ul>
+                </li>
                 <li>Start exploring courses immediately!</li>
               </ol>
+              
+              <div style={{ 
+                marginTop: '12px', 
+                padding: '8px 12px', 
+                background: '#e8f5e8', 
+                borderLeft: '3px solid #28a745', 
+                borderRadius: '4px',
+                fontSize: '11px',
+                color: '#155724'
+              }}>
+                <strong>💚 Don't worry about email issues!</strong> Our system ensures you can always create an account and start learning.
+              </div>
             </div>
           </div>
         </div>

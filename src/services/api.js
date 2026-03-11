@@ -2,13 +2,81 @@ const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const api = {
   // Auth
-  register: async (name, email, password) => {
-    const res = await fetch(`${BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    });
-    return res.json();
+  register: async (name, email, phone, password) => {
+    console.log('🚀 API: Starting registration request', { name, email, phone, url: `${BASE_URL}/auth/register` });
+    
+    try {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ name, email, phone, password }),
+      });
+      
+      console.log('📡 API: Response received', { 
+        status: res.status, 
+        statusText: res.statusText, 
+        ok: res.ok 
+      });
+      
+      let data;
+      try {
+        data = await res.json();
+        console.log('📄 API: Response data', data);
+      } catch (jsonError) {
+        console.error('❌ API: Failed to parse JSON response', jsonError);
+        // If JSON parsing fails, create a generic error response
+        data = { message: 'Invalid server response' };
+      }
+      
+      // Handle different response status codes
+      if (res.ok) {
+        // Success (200-299)
+        console.log('✅ API: Registration successful', data);
+        return {
+          success: true,
+          ...data
+        };
+      } else if (res.status === 503) {
+        // Service Unavailable - Email service down
+        console.log('⚠️ API: Email service unavailable', data);
+        return {
+          success: false,
+          error: 'EMAIL_SERVICE_UNAVAILABLE',
+          message: data.message || 'Email service is temporarily unavailable. Please try again later.',
+          details: data.details
+        };
+      } else if (res.status >= 400 && res.status < 500) {
+        // Client error (400-499)
+        console.error('❌ API: Client error', { status: res.status, data });
+        return {
+          success: false,
+          error: 'CLIENT_ERROR',
+          message: data.message || 'Registration failed. Please check your information.',
+          details: data.error || data.details
+        };
+      } else {
+        // Server error (500+)
+        console.error('💥 API: Server error', { status: res.status, data });
+        return {
+          success: false,
+          error: 'SERVER_ERROR',
+          message: data.message || 'Server error occurred. Please try again.',
+          details: data.error || data.details
+        };
+      }
+    } catch (error) {
+      // Network error
+      console.error('Network error during registration:', error);
+      return {
+        success: false,
+        error: 'NETWORK_ERROR',
+        message: 'Unable to connect to the server. Please check your internet connection and try again.',
+        details: error.message
+      };
+    }
   },
 
   login: async (email, password) => {
